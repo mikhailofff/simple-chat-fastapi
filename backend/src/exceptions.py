@@ -12,10 +12,10 @@ class UserException(HTTPException):
 
 
 class AuthenticationError(UserException):
-    def __init__(self, username: str):
+    def __init__(self):
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Could not validate credentials for {username}",
+            detail=f"Could not validate credentials for user",
             headers={
                 "WWW-Authenticate": "Bearer",
                 "X-Error-Code": "USER_IS_UNAUTHORIZED"

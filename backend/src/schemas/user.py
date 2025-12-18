@@ -8,7 +8,8 @@ class AccessTokenResponse(BaseModel):
 
 
 class RefreshTokenResponse(BaseModel):
-    refresh_token: str = Field(description="JWT refresh token for authenticated requests")
+    access_token: str = Field(description="new JWT access token for authenticated requests")
+    token_type: str = Field(description="Token type, typically 'bearer'")
 
 
 class TokenData(BaseModel):

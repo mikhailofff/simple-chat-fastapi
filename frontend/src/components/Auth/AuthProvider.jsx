@@ -19,6 +19,50 @@ export function AuthProvider({ children }) {
         }
         return ""
     })
+
+    const signOut = useCallback(() => {
+        setToken("")
+        setUser(null)
+    }, [])
+
+    const refreshToken = useCallback(async () => {
+        try {
+            const response = await fetch(API_BASE_URL + "refresh", {
+                method: "POST",
+                credentials: "include", 
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setToken(data.access_token); 
+                return data.access_token;
+            }
+        } catch (error) {
+            console.error("Refresh failed", error);
+        }
+        
+        signOut();
+        return null;
+    }, [signOut]);
+
+    const apiFetch = useCallback(async (endpoint, options = {}) => {
+        const headers = {
+            ...options.headers,
+            Authorization: `Bearer ${token}`,
+        };
+
+        let response = await fetch(API_BASE_URL + endpoint, { ...options, headers });
+
+        if (response.status === 401) {
+            const newToken = await refreshToken();
+            if (newToken) {
+                headers.Authorization = `Bearer ${newToken}`;
+                response = await fetch(API_BASE_URL + endpoint, { ...options, headers });
+            }
+        }
+
+        return response;
+    }, [token, refreshToken]);
     
     const [user, setUser] = useState(() => {
         const stored = localStorage.getItem("auth_user")
@@ -52,6 +96,7 @@ export function AuthProvider({ children }) {
                 "Content-Type": "application/x-www-form-urlencoded",
             },
             body: form.toString(),
+            credentials: "include",
         })
 
         if (!response.ok) {
@@ -81,19 +126,16 @@ export function AuthProvider({ children }) {
         return true
     }, [signIn])
 
-    const signOut = useCallback(() => {
-        setToken("")
-        setUser(null)
-    }, [])
-
     const value = useMemo(() => ({ 
         token, 
+        setToken,
         user, 
         isAuthenticated: Boolean(token), 
         signIn, 
         signUp, 
-        signOut 
-    }), [token, user, signIn, signUp, signOut])
+        signOut,
+        refreshToken
+    }), [token, user, signIn, signUp, signOut, refreshToken])
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -137,7 +137,7 @@ async def refresh_access_token(
     secure_headers.set_headers(response)
 
     payload = verify_token(refresh_token)
-    token_response = RefreshTokenResponse(refresh_token=create_access_token({"sub": payload.get("sub")}))
+    token_response = RefreshTokenResponse(access_token=create_access_token({"sub": payload.get("sub")}), token_type="bearer")
     return token_response
 
 

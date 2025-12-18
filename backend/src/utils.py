@@ -33,9 +33,9 @@ def verify_token(token: str):
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except ExpiredSignatureError:
         # todo custom error handling
-        raise AuthenticationError(username=payload.get("sub"))
+        raise AuthenticationError()
     except InvalidTokenError:
-        raise AuthenticationError(username=payload.get("sub"))
+        raise AuthenticationError()
 
     return payload
 
