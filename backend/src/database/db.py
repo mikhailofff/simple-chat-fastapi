@@ -48,12 +48,16 @@ async def get_db():
             await session.close()
 
 
-async def get_all_messages(session: AsyncSession):
-    stmt = select(Message).order_by(Message.id)
+async def get_paginated_messages(session: AsyncSession, last_id: int, limit: int):
+    stmt = select(Message).order_by(Message.id.desc()).limit(limit)
+
+    if last_id:
+        stmt = stmt.where(Message.id < last_id)
+
     result = await session.execute(stmt)
     messages = result.scalars().all()
     
-    return messages
+    return messages[::-1]
 
 
 async def create_message(
@@ -119,7 +123,7 @@ async def get_by_username(session: AsyncSession, username: str):
 async def authenticate_user(session: AsyncSession, username: str, password: str):
     user = await get_by_username(session, username)
     if not user or not verify_password(password, user.hashed_password):
-        raise AuthenticationError(username=username)
+        raise AuthenticationError()
     return user 
 
 

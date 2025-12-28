@@ -5,23 +5,34 @@ export const useApi = () => {
     const { token, refreshToken } = useAuth()
 
     const makeRequest = async (endpoint, options = {}) => {
+        const { params, ...restOptions } = options
+
+        const url = new URL(API_BASE_URL + endpoint)
+
+        if (params && typeof params === 'object') {
+            Object.entries(params).forEach(([key, value]) => {
+                if (value !== null && value !== undefined) {
+                    url.searchParams.append(key, value)
+                }
+            })
+        }
+
         const getHeaders = (currentToken) => ({
             "Content-Type": "application/json",
             ...(currentToken ? { "Authorization": `Bearer ${currentToken}` } : {}),
-            ...options.headers,
+            ...restOptions.headers,
         })
 
-        let response = await fetch(API_BASE_URL + endpoint, {
-            ...options,
+        let response = await fetch(url.toString(), {
+            ...restOptions,
             headers: getHeaders(token),
         })
 
         if (response.status === 401) {
-            const newToken = await refreshToken() 
-            
+            const newToken = await refreshToken()
             if (newToken) {
-                response = await fetch(API_BASE_URL + endpoint, {
-                    ...options,
+                response = await fetch(url.toString(), {
+                    ...restOptions,
                     headers: getHeaders(newToken),
                 })
             }

@@ -13,7 +13,7 @@ from ..database.db import (
     authenticate_user,
     create_user,
     get_db,
-    get_all_messages,
+    get_paginated_messages,
     create_message,
     delete_message_from_db,
     update_message_from_db,
@@ -163,7 +163,9 @@ async def change_password(
 async def get_messages(
     response: Response, 
     user: Annotated[get_current_user, Depends()],
-    session: Annotated[AsyncSession, Depends(get_db)]
+    session: Annotated[AsyncSession, Depends(get_db)],
+    last_id: Annotated[int | None, Query()] = None,
+    limit : Annotated[int, Query()] = 20
 ):
     '''
     Retrieve all messages from the chat.
@@ -172,15 +174,15 @@ async def get_messages(
     '''
     secure_headers.set_headers(response)
 
-    cached_messages_json = await redis_connection.get(CACHE_KEY_MESSAGES)
-    if cached_messages_json:
-        cached_payload = json.loads(cached_messages_json)
-        response.headers["X-Cache"] = "HIT"
-        logger.debug("Messages cache hit")
-        return MessageListResponse(**cached_payload)
+    # cached_messages_json = await redis_connection.get(CACHE_KEY_MESSAGES)
+    # if cached_messages_json and last_id is None:
+    #     cached_payload = json.loads(cached_messages_json)
+    #     response.headers["X-Cache"] = "HIT"
+    #     logger.debug("Messages cache hit")
+    #     return MessageListResponse(**cached_payload)
 
     try:
-        messages = await get_all_messages(session)
+        messages = await get_paginated_messages(session, last_id, limit)
         messages_response = MessageListResponse(
             messages=[message.to_pydantic() for message in messages]
         )

@@ -15,6 +15,10 @@ import {parseTimestamp, shouldShowDateHeader} from '../../utils/dateUtils.js'
 
 export function Chat() {
 	const [messages, setMessages] = useState([]);
+	const messagesRef = useRef(messages);
+	const [loading, setLoading] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+	const chatContainerRef = useRef(null);
 	const messagesEndRef = useRef(null);
 	const [inputValue, setInputValue] = useState('');
 	const inputRef = useRef(null);
@@ -109,6 +113,10 @@ export function Chat() {
 	
 		loadMessages();
 	}, []);
+
+	useEffect(() => {
+		messagesRef.current = messages;
+	}, [messages]);
 	
 	useEffect(() => {
 		const lastMessage = messages[messages.length - 1];
@@ -118,6 +126,60 @@ export function Chat() {
 			}, 100);
 		}
 	}, [messages,  username]);
+
+	const handleScroll = useCallback(() => {
+		const container = chatContainerRef.current;
+		if (container.scrollTop === 0 && !loading && hasMore) {
+			if(messagesRef.current.length > 0) {
+				loadOlderMessages();
+			}
+		}
+	}, [loading, hasMore]);
+
+	const loadOlderMessages = async () => {
+		setLoading(true);
+		const firstMessage = messagesRef.current[1]; 
+		const lastId = firstMessage ? firstMessage.id : null;
+	
+		try {
+			const params = new URLSearchParams();
+			if (lastId !== null) params.append('last_id', lastId);
+			params.append('limit', 20);
+
+			const response = await makeRequest(`messages?${params.toString()}`, {
+				method: "GET",
+			});
+			const olderMessages = response.messages.map(element => ({
+				id: element.id,
+				text: element.content,
+				timestamp: parseTimestamp(element.created_at).toLocaleTimeString(),
+				updatedAt: element.updated_at ? parseTimestamp(element.updated_at).toLocaleTimeString() : null,
+				sender: element.created_by,
+			  }));
+	
+			if (olderMessages.length < 20) {
+				setHasMore(false);
+			}
+	
+			setMessages(prev => [...olderMessages, ...prev]);
+		} catch (err) {
+			console.error("Failed to load older messages", err);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		const container = chatContainerRef.current;
+		if (container) {
+		  container.addEventListener('scroll', handleScroll);
+		}
+		return () => {
+		  if (container) {
+			container.removeEventListener('scroll', handleScroll);
+		  }
+		};
+	}, [handleScroll]);
 
 	const handleSendMessage = async () => {
 		if (!inputValue.trim()) {
@@ -207,7 +269,7 @@ export function Chat() {
 
 	return (
 		<div className={styles['chat-main-layout']}>
-			<div className={styles['chat-container']}>
+			<div className={styles['chat-container']} ref={chatContainerRef}>
 				<ChatMessages 
 					messages={messages}
 					user={username}
