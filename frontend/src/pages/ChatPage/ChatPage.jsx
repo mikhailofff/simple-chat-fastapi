@@ -289,14 +289,16 @@ export function Chat() {
 
 	return (
 		<div className={styles['chat-main-layout']}>
-			<div className={styles['chat-container']} ref={chatContainerRef}>
-				<ChatMessages 
-					messages={messages}
-					user={username}
-					messagesEndRef={messagesEndRef}
-					onDeleteMessage={handleDeleteMessage}
-					onUpdateMessage={handleUpdateMessage}
-				/>
+			<div className={styles['chat-container']}>
+				<div className={styles['messages-wrapper']}>
+					<ChatMessages 
+						messages={messages}
+						user={username}
+						messagesEndRef={messagesEndRef}
+						onDeleteMessage={handleDeleteMessage}
+						onUpdateMessage={handleUpdateMessage}
+					/>
+				</div>
 				<ChatInput
 					inputValue={inputValue}
 					setInputValue={setInputValue}

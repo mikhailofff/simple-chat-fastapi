@@ -78,9 +78,21 @@
     height: 700px;
     border-radius: 0 0 12px 12px;
     overflow-y: auto;
+    overflow: hidden; 
     background: #fff;
     margin: 0;
     box-shadow: 0 8px 32px rgba(37,99,235,0.10);
+  }
+
+  .messages-wrapper {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 16px 16px 16px;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: fadeIn 0.7s;
   }
   
   .messages {
