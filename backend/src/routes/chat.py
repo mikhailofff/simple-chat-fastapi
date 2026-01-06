@@ -45,7 +45,7 @@ from ..utils import create_access_token, create_refresh_token, verify_token
 from ..dependencies import get_current_user
 
 
-CACHE_KEY_MESSAGES = "chat:messages"
+CACHE_MESSAGES_PREFIX = "chat:messages"
 
 logger = logging.getLogger(__name__)
 
@@ -174,12 +174,18 @@ async def get_messages(
     '''
     secure_headers.set_headers(response)
 
-    # cached_messages_json = await redis_connection.get(CACHE_KEY_MESSAGES)
-    # if cached_messages_json and last_id is None:
-    #     cached_payload = json.loads(cached_messages_json)
-    #     response.headers["X-Cache"] = "HIT"
-    #     logger.debug("Messages cache hit")
-    #     return MessageListResponse(**cached_payload)
+    if not last_id:
+        cache_key_messages = CACHE_MESSAGES_PREFIX + "0" + "-" + str(limit)
+    else:
+        cache_key_messages = CACHE_MESSAGES_PREFIX + str(last_id) + "-" + str(last_id + limit)
+
+    cached_messages_json = await redis_connection.get(cache_key_messages)
+
+    if cached_messages_json:
+        cached_payload = json.loads(cached_messages_json)
+        response.headers["X-Cache"] = "HIT"
+        logger.debug("Messages cache hit")
+        return MessageListResponse(**cached_payload)
 
     try:
         messages = await get_paginated_messages(session, last_id, limit)
@@ -191,7 +197,7 @@ async def get_messages(
             messages_response.model_dump_json() if hasattr(messages_response, 'model_dump_json')
             else json.dumps(jsonable_encoder(messages_response))
         )
-        await redis_connection.set(CACHE_KEY_MESSAGES, serialized, ex=3600)
+        await redis_connection.set(cache_key_messages, serialized, ex=3600)
 
         response.headers["X-Cache"] = "MISS"
         logger.debug("Messages cache miss; fetched from DB and cached")
@@ -223,7 +229,7 @@ async def send_message(
             created_by=message_request.created_by,
         )
 
-        await redis_connection.delete(CACHE_KEY_MESSAGES)
+        await redis_connection.flushdb()
 
         message_response = CreateMessageResponse(id=new_message.id)
 
@@ -251,7 +257,7 @@ async def delete_message(
     try:
         success = await delete_message_from_db(session, message_request.id)
 
-        await redis_connection.delete(CACHE_KEY_MESSAGES)
+        await redis_connection.flushdb()
 
         logger.info("Message deleted")
         return DeleteMessageResponse(success=success)
@@ -277,7 +283,7 @@ async def update_message(
     try:
         success = await update_message_from_db(session, message_request.id, message_request.content)
 
-        await redis_connection.delete(CACHE_KEY_MESSAGES)
+        await redis_connection.flushdb()
 
         logger.info("Message updated")
         return UpdateMessageResponse(success=success)
