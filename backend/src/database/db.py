@@ -135,7 +135,7 @@ async def create_user(session: AsyncSession, username: str, password: str):
         await session.commit()
         await session.refresh(user)
     except IntegrityError:
-        session.rollback()
+        await session.rollback()
         raise DuplicateUserError(username=user.username)
 
     return user
