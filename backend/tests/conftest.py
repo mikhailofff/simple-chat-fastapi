@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 import pytest_asyncio
 from fastapi import FastAPI
@@ -22,7 +23,10 @@ async def redis_connection():
     return mock_redis
 
 
-SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///backend/tests/test.db"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "test.db")
+
+SQLALCHEMY_DATABASE_URL = f"sqlite+aiosqlite:///{DB_PATH}"
 
 async_engine = create_async_engine(
     SQLALCHEMY_DATABASE_URL,
