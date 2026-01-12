@@ -41,13 +41,6 @@ TestingAsyncSessionLocal = async_sessionmaker(
 )
 
 
-@asynccontextmanager
-async def test_lifespan(app: FastAPI, redis_conn):
-    await FastAPILimiter.init(redis_conn)
-    yield
-    await FastAPILimiter.close()
-
-
 @pytest_asyncio.fixture(scope="session", autouse=True)
 async def cleanup_db():
     async with async_engine.begin() as conn:
@@ -69,11 +62,13 @@ async def db():
 
 @pytest_asyncio.fixture
 async def app(db, redis_connection) -> FastAPI:
-    async def lifespan_wrapper(app: FastAPI):
-        async with test_lifespan(app, redis_connection):
-            yield
+    @asynccontextmanager
+    async def test_lifespan(_: FastAPI):
+        await FastAPILimiter.init(redis_connection)
+        yield
+        await FastAPILimiter.close()
     
-    app = FastAPI(lifespan=lifespan_wrapper)
+    app = FastAPI(lifespan=test_lifespan)
     app.include_router(router, prefix='/api')
 
     async def override_get_session():
