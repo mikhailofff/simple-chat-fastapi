@@ -13,7 +13,7 @@ async def test_send_message(async_client: httpx.AsyncClient):
     access_token = async_client.cookies.get("access_token")
     message_request = {
         "content": "Hello world!",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
         "created_by": "testname"
     }
@@ -35,7 +35,7 @@ async def test_send_message(async_client: httpx.AsyncClient):
 async def test_send_message_as_unauthorized(async_client: httpx.AsyncClient):
     message_request = {
         "content": "Hello world!",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
         "created_by": "testname"
     }
@@ -53,7 +53,7 @@ async def test_send_message_with_invalid_token(async_client: httpx.AsyncClient):
     access_token = "invalid_token"
     message_request = {
         "content": "Hello world!",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
         "created_by": "testname"
     }
@@ -75,7 +75,7 @@ async def test_send_message_with_expired_token(async_client: httpx.AsyncClient):
 
     message_request = {
         "content": "Hello world!",
-        "created_at": datetime.now().isoformat(),
+        "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
         "created_by": "testname"
     }
