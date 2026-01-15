@@ -7,7 +7,7 @@ from ..conftest import create_expired_token
 from src.schemas.config import settings
 
 
-@pytest.mark.order(after="tests/test_api/test_messages.py::test_messages_not_empty")
+@pytest.mark.order(after="tests/test_api/test_update_message.py::test_update_message_with_expired_token")
 @pytest.mark.asyncio
 async def test_delete_message_as_unauthorized(async_client: httpx.AsyncClient):
     message_request = {
