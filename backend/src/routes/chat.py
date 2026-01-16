@@ -4,7 +4,6 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Body, WebSocket, WebSocketDisconnect, Response, Cookie
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi_limiter.depends import RateLimiter
 from sqlalchemy.ext.asyncio.session import AsyncSession
 from secure import Secure
 from fastapi.encoders import jsonable_encoder
@@ -43,7 +42,7 @@ from ..core.redis_client import get_redis_connection
 
 from ..utils import create_access_token, create_refresh_token, verify_token
 
-from ..dependencies import get_current_user
+from ..dependencies import limiter, get_current_user
 
 
 CACHE_MESSAGES_PREFIX = "chat:messages:"
@@ -78,8 +77,6 @@ manager = ConnectionManager()
 router = APIRouter()
 
 secure_headers = Secure.with_default_headers()
-
-limiter = RateLimiter(times=100, seconds=60)
 
 
 @router.post('/sign-up', response_model=UserResponse, dependencies=[Depends(limiter)])
