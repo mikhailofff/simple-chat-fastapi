@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 import jwt
 from datetime import datetime, timezone, timedelta
 
-from src.routes.chat import router, limiter
+from src.routes.chat import router
 
 from src.database.db import get_db
 from src.database.models.base import Base
@@ -80,7 +80,6 @@ async def app(db, redis_connection) -> FastAPI:
         async with TestingAsyncSessionLocal() as session:
             yield session
 
-    app.dependency_overrides[limiter] = lambda: None
     app.dependency_overrides[get_db] = override_get_session
     app.dependency_overrides[get_redis_connection] = lambda : redis_connection
 
