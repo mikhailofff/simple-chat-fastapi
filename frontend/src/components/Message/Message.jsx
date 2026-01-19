@@ -64,7 +64,7 @@ export default function Message({ user, text, sender, timestamp, updatedAt, onDe
 
     return (
         <div 
-            className={styles.message}
+            className={`${styles.message} ${user === sender ? styles['user-message'] : ''}`}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}    
             style={{ position: 'relative' }}
