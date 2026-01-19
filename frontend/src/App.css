@@ -1,16 +1,21 @@
 :root {
-  --primary-color: #17419b;
-  --secondary-color: #38bdf8;
-  --accent-color: #5d24fb;
+  --primary-color: #0084ff;
+  --primary-dark: #0073e6;
+  --secondary-color: #1a96d4;
+  --accent-color: #31a24c;
   --error-color: #dc2626;
-  --text-color: #1f2937;
-  --bg-color: #f3f4f6;
-  --bg-gradient: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%);
-  --border-color: #e5e7eb;
-  --user-message-bg: #e0f2fe;
-  --other-message-bg: #f1f5f9;
-  --system-message-bg: #c3e6fe;
-  --system-message-color: #ae09b4;
+  --text-color: #000;
+  --text-secondary: #65676b;
+  --bg-color: #ffffff;
+  --bg-secondary: #f0f0f0;
+  --bg-gradient: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  --border-color: #e5e5e5;
+  --user-message-bg: #0084ff;
+  --user-message-text: #ffffff;
+  --other-message-bg: #e5e5ea;
+  --other-message-text: #000;
+  --system-message-bg: #f0f0f0;
+  --system-message-color: #65676b;
 }
 
 * {
@@ -20,7 +25,7 @@
 body {
   min-height: 100vh;
   background: var(--bg-gradient);
-  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   overflow: hidden;
 }
 
@@ -32,11 +37,11 @@ body {
 }
 
 .app-header {
-  background-color: white;
-  padding: 1rem;
-  border-bottom: 1px solid var(--border-color);
+  background-color: var(--primary-color);
+  padding: 1rem 1.5rem;
+  border-bottom: none;
   width: 100%;
-  box-shadow: 0 2px 8px rgba(37,99,235,0.08);
+  box-shadow: 0 2px 8px rgba(0, 132, 255, 0.15);
   z-index: 10;
   position: relative;
 }
@@ -48,7 +53,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0;
+}
+
+.header-content h1 {
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
 }
 
 .header-content nav {
