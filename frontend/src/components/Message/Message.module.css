@@ -15,7 +15,253 @@
   font-style: italic;
   border-left: 4px solid var(--accent-color);
   border-right: 4px solid var(--accent-color);
+  border-radius: 12px;.message {
+  margin: 4px 0;
+  padding: 12px 16px;
   border-radius: 12px;
+  background: #e5e5ea;
+  color: #000;
+  box-shadow: none;
+  position: relative;
+  transition: background 0.2s;
+  animation: fadeIn 0.3s;
+  max-width: 70%;
+  word-wrap: break-word;
+  align-self: flex-start;
+  margin-right: auto;
+}
+
+.message.user-message,
+.message[class*="user"] {
+  background: #0084ff;
+  color: #ffffff;
+  border-radius: 12px;
+  align-self: flex-end;
+  margin-right: 0;
+  margin-left: auto;
+  max-width: 70%;
+}
+
+.system-message {
+  background: #f0f0f0;
+  color: #65676b;
+  font-style: italic;
+  border: none;
+  border-radius: 12px;
+  margin: 8px auto;
+  padding: 12px 16px;
+  text-align: center;
+  font-size: 0.95rem;
+  box-shadow: none;
+  animation: fadeIn 0.3s;
+  align-self: center;
+  max-width: 90%;
+}
+
+.date-header {
+  background: transparent;
+  box-shadow: none;
+  padding: 16px 0;
+  text-align: center;
+  margin: 0;
+  width: 100%;
+}
+
+.date-text {
+  color: #65676b;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 12px;
+  background: #f0f0f0;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+.message-info {
+  font-size: 0.8rem;
+  color: #65676b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  gap: 8px;
+}
+
+.message.user-message .message-info {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.sender {
+  font-weight: 600;
+  color: #0084ff;
+}
+
+.message.user-message .sender {
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+}
+
+.timestamp {
+  color: #65676b;
+  font-size: 0.8rem;
+}
+
+.message.user-message .timestamp {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.editedLabel {
+  margin-left: 4px;
+  color: #65676b;
+  font-size: 0.8rem;
+}
+
+.message.user-message .editedLabel {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.actionButtons {
+  position: absolute;
+  top: -30px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.message:hover .actionButtons {
+  opacity: 1;
+}
+
+.updateButton {
+  background: #0084ff;
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 132, 255, 0.3);
+  padding: 0;
+  line-height: 1;
+  min-width: 28px;
+  min-height: 28px;
+}
+
+.updateButton:hover {
+  background: #0073e6;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.deleteButton {
+  background: #ef4444;
+  border: none;
+  border-radius: 35%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  padding: 0;
+  line-height: 1;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.deleteButton:hover {
+  background: #dc2626;
+  transform: scale(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.editContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.editInput {
+  width: 100%;
+  padding: 8px 12px;
+  border: 2px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.editInput:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.editButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.saveButton {
+  background: #10b981;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.saveButton:hover {
+  background: #059669;
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.cancelButton {
+  background: #6b7280;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  color: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cancelButton:hover {
+  background: #4b5563;
+  transform: scale(1.05);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+
   margin: 0.5rem 0;
   padding: 0.75rem 1.5rem;
   text-align: center;
