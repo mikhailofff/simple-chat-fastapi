@@ -93,7 +93,7 @@ async def async_client(app: FastAPI) -> AsyncClient:
             yield client
 
 
-def create_expired_token(data: dict, secret_key: str):
+def create_expired_token(data: dict[str, str], secret_key: str):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) - timedelta(days=1)
     to_encode.update({"exp": expire})
