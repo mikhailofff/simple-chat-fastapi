@@ -4,25 +4,29 @@
     justify-content: center;
     align-items: flex-start;
     width: 100%;
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
-    margin-top: 32px;
+    margin-top: 16px;
     min-height: 80vh;
+    gap: 16px;
+    padding: 0 16px;
   }
   
   .userlist-frame {
-    background: linear-gradient(135deg, #e3f0ff 60%, #d0e7ff 100%);
-    border-radius: 18px;
-    box-shadow: 0 8px 32px rgba(56,189,248,0.18);
-    border: 2px solid #b6d0f7;
-    padding: 18px 12px 18px 12px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e5e5;
+    padding: 16px;
     min-width: 200px;
     max-width: 240px;
-    margin-left: 24px;
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    height: fit-content;
+    position: sticky;
+    top: 16px;
   }
   
   .online-users {
@@ -33,20 +37,20 @@
   }
   
   .online-users-label {
-    background: linear-gradient(90deg, #19439e 0%, #38bdf8 100%);
+    background: #0084ff;
     color: #fff;
     font-weight: 600;
-    border-radius: 18px;
-    padding: 8px 18px;
-    font-size: 1.1em;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(0, 132, 255, 0.2);
     display: inline-block;
   }
   
   .userlist-separator {
     border: none;
-    border-top: 2px solid #b6d0f7;
-    margin: 0 0 12px 0;
+    border-top: 1px solid #e5e5e5;
+    margin: 8px 0;
     width: 100%;
     box-sizing: border-box;
   }
@@ -54,18 +58,7 @@
   .userlist {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-  }
-  
-  .chat-main-layout {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: flex-start;
-    width: 100%;
-    max-width: 1200px;
-    margin: 0 auto;
-    min-height: 80vh;
+    gap: 8px;
   }
   
   .chat-container {
@@ -74,33 +67,31 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    max-width: none;
     height: 85vh;
-    border-radius: 0 0 12px 12px;
-    overflow-y: auto;
-    background: #fff;
-    margin: 0;
-    box-shadow: 0 8px 32px rgba(37,99,235,0.10);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   }
 
   .messages-wrapper {
     flex: 1;
     overflow-y: auto;
-    padding: 0 16px 0;
-    background: transparent;
+    padding: 16px;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     animation: fadeIn 0.7s;
   }
   
   .messages {
     flex-grow: 1;
-    padding: 0 16px 0;
+    padding: 0;
     background: transparent;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     animation: fadeIn 0.7s;
   }
   
@@ -108,42 +99,51 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 1.25rem 1.5rem;
-    gap: 1rem;
-    background: #f8fafc;
-    border-top: 1px solid var(--border-color);
+    padding: 16px;
+    gap: 12px;
+    background: #ffffff;
+    border-top: 1px solid #e5e5e5;
   }
   
   input[type=text] {
-    font-size: 1em;
-    padding: 0.75rem 1.25rem;
+    font-size: 1rem;
+    padding: 12px 16px;
     border-radius: 24px;
     outline: none;
-    border: 1.5px solid var(--primary-color);
-    background: #f1f5f9;
+    border: 1.5px solid #e5e5e5;
+    background: #f0f0f0;
     flex: 1;
     transition: border 0.2s, box-shadow 0.2s;
-    box-shadow: 0 1px 4px rgba(37,99,235,0.05);
+    font-family: inherit;
+  }
+  input[type=text]::placeholder {
+    color: #65676b;
   }
   input[type=text]:focus {
-    border: 1.5px solid var(--secondary-color);
-    box-shadow: 0 2px 8px rgba(56,189,248,0.10);
+    border: 1.5px solid #0084ff;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(0, 132, 255, 0.1);
   }
   
   button {
     cursor: pointer;
-    background: var(--primary-color);
+    background: #0084ff;
     color: white;
-    min-width: 100px;
-    font-size: 1.1em;
+    min-width: 80px;
+    font-size: 1rem;
     font-weight: 600;
     border: none;
     border-radius: 24px;
-    padding: 0.75rem 2rem;
-    box-shadow: 0 2px 8px rgba(37,99,235,0.10);
+    padding: 12px 24px;
+    box-shadow: 0 2px 8px rgba(0, 132, 255, 0.2);
     transition: background 0.2s, box-shadow 0.2s;
   }
   button:hover {
-    background: var(--secondary-color);
-    box-shadow: 0 4px 16px rgba(56,189,248,0.15);
+    background: #0073e6;
+    box-shadow: 0 4px 12px rgba(0, 132, 255, 0.3);
   }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
