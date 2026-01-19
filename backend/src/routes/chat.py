@@ -172,8 +172,7 @@ async def get_messages(
     '''
     secure_headers.set_headers(response)
 
-    if not first_id:
-        cache_key_messages = CACHE_MESSAGES_PREFIX + "last_messages"
+    cache_key_messages = CACHE_MESSAGES_PREFIX + "last_messages"
     if first_id:
         if first_id - 20 < 0:
             cache_key_messages = CACHE_MESSAGES_PREFIX + "1-" + str(first_id-1)
@@ -289,14 +288,11 @@ async def update_message(
             range = words[-1].split('-')
             keys.append((int(range[-2]), int(range[-1])))
 
-        flag = False
+        cache_key_messages = CACHE_MESSAGES_PREFIX + "last_messages"
         for key in keys:
             if key[0] <= message_request.id and message_request.id <= key[1]:
-                flag = True
                 cache_key_messages = CACHE_MESSAGES_PREFIX + str(key[0]) + "-" + str(key[1])
                 break
-        if not flag:
-            cache_key_messages = CACHE_MESSAGES_PREFIX + "last_messages"
 
         cached_messages_json = await redis_connection.get(cache_key_messages)
         cached_payload = json.loads(cached_messages_json)
