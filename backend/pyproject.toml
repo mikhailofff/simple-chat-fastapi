@@ -17,6 +17,7 @@ dependencies = [
     "httpx>=0.28.1",
     "mypy>=1.19.1",
     "passlib[bcrypt]>=1.7.4",
+    "pre-commit>=4.5.1",
     "pydantic-settings>=2.10.1",
     "pyjwt[crypto]>=2.10.1",
     "pytest>=8.4.2",
