@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta, timezone
+
 import jwt
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
-from .schemas.config import settings
-
 from .exceptions import AuthenticationError
-
+from .schemas.config import settings
 
 SECRET_KEY = settings.SECRET_KEY
 ALGORITHM = settings.ALGORITHM
@@ -38,4 +37,3 @@ def verify_token(token: str):
         raise AuthenticationError()
 
     return payload
-

@@ -1,38 +1,27 @@
-from datetime import datetime, timezone
 import logging
-from passlib.context import CryptContext
+from datetime import datetime, timezone
 
+from passlib.context import CryptContext
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio.engine import create_async_engine
-from sqlalchemy.ext.asyncio.session import async_sessionmaker, AsyncSession
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.ext.asyncio.engine import create_async_engine
+from sqlalchemy.ext.asyncio.session import AsyncSession, async_sessionmaker
 
 from ..config import DATABASE_URL
+from ..exceptions import AuthenticationError, ChangingPasswordError, DuplicateUserError
 from .models.base import Base
 from .models.message import Message
 from .models.user import User
-
-from ..exceptions import (
-    AuthenticationError,
-    DuplicateUserError,
-    ChangingPasswordError
-)
-
 
 logger = logging.getLogger(__name__)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 engine = create_async_engine(
-    url=DATABASE_URL, 
-    echo=True, 
-    echo_pool=True,
-    pool_size=20, 
-    max_overflow=0, 
-    pool_recycle=3600, 
-    pool_pre_ping=True
+    url=DATABASE_URL, echo=True, echo_pool=True, pool_size=20, max_overflow=0, pool_recycle=3600, pool_pre_ping=True
 )
 
 SessionLocal = async_sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
 
 async def get_db():
     async with engine.begin() as conn:
@@ -40,7 +29,7 @@ async def get_db():
     async with SessionLocal() as session:
         try:
             yield session
-        except Exception as e:
+        except Exception:
             logger.exception("DB session error")
             await session.rollback()
             raise
@@ -56,22 +45,13 @@ async def get_paginated_messages(session: AsyncSession, first_id: int, limit: in
 
     result = await session.execute(stmt)
     messages = result.scalars().all()
-    
+
     return messages[::-1]
 
 
-async def create_message(
-    session: AsyncSession,
-    content: str,
-    created_at: datetime,
-    created_by: str
-):
-    db_message = Message(
-        content=content,
-        created_at=created_at,
-        created_by=created_by
-    )
-    
+async def create_message(session: AsyncSession, content: str, created_at: datetime, created_by: str):
+    db_message = Message(content=content, created_at=created_at, created_by=created_by)
+
     session.add(db_message)
     await session.commit()
     await session.refresh(db_message)
@@ -124,7 +104,7 @@ async def authenticate_user(session: AsyncSession, username: str, password: str)
     user = await get_by_username(session, username)
     if not user or not verify_password(password, user.hashed_password):
         raise AuthenticationError()
-    return user 
+    return user
 
 
 async def create_user(session: AsyncSession, username: str, password: str):
@@ -148,5 +128,5 @@ async def change_password_in_db(session: AsyncSession, username: str, old_passwo
         raise ChangingPasswordError(username=username)
     user.hashed_password = get_password_hash(new_password)
     await session.commit()
-    
+
     return True

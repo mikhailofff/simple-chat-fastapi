@@ -1,9 +1,6 @@
-from src.app import app
-
-from os import path
 import logging
 from logging.config import fileConfig
-
+from os import path
 
 logging_config_file_path = path.join(path.dirname(path.abspath(__file__)), "logging_config.ini")
 fileConfig(logging_config_file_path, disable_existing_loggers=False)

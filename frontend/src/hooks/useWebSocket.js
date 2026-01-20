@@ -60,7 +60,7 @@ export function useWebSocket({ username, onMessage, onOnlineCount, hasTodayMessa
                     const today = new Date();
                     const yesterday = new Date(today);
                     yesterday.setDate(yesterday.getDate() - 1);
-                    
+
                     if(today.toDateString() === parsedDate.toDateString()) {
                         timestamp = 'Today';
                     }
@@ -78,10 +78,10 @@ export function useWebSocket({ username, onMessage, onOnlineCount, hasTodayMessa
                         sender: '<DateHeader>',
                     });
                 }
-                
+
                 const timestamp = (parsedDate) ? parsedDate.toLocaleTimeString() : eventJSON.created_at;
                 onMessageRef.current && onMessageRef.current({
-                    id: eventJSON.id || null, 
+                    id: eventJSON.id || null,
                     text: eventJSON.content,
                     timestamp: timestamp,
                     sender: eventJSON.created_by,
@@ -126,4 +126,4 @@ export function useWebSocket({ username, onMessage, onOnlineCount, hasTodayMessa
     };
 
     return { ws, sendMessage, userlist };
-} 
+}

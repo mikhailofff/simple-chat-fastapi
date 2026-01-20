@@ -1,11 +1,11 @@
 from typing import Annotated
+
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_limiter.depends import RateLimiter
 
-from .utils import verify_token
 from .schemas.user import TokenData
-
+from .utils import verify_token
 
 limiter = RateLimiter(times=100, seconds=60)
 

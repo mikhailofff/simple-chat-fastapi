@@ -1,22 +1,15 @@
-from contextlib import asynccontextmanager
 import logging
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi_limiter import FastAPILimiter 
-
-from .routes.chat import router
+from fastapi_limiter import FastAPILimiter
 
 from .core.redis_client import get_redis_connection
-
-from .exceptions import (
-    AuthenticationError,
-    DuplicateUserError,
-    ChangingPasswordError
-)
-
+from .exceptions import AuthenticationError, ChangingPasswordError, DuplicateUserError
+from .routes.chat import router
 
 logger = logging.getLogger(__name__)
 loggerChat = logging.getLogger("src.chat")
@@ -30,7 +23,9 @@ async def lifespan(_: FastAPI):
     logger.info("Closing rate limiter")
     await FastAPILimiter.close()
 
+
 app = FastAPI(lifespan=lifespan)
+
 
 @app.exception_handler(AuthenticationError)
 async def authentication_error_handler(request: Request, exc: AuthenticationError):
@@ -42,13 +37,13 @@ async def authentication_error_handler(request: Request, exc: AuthenticationErro
             "detail": exc.detail,
             "error_code": exc.headers["X-Error-Code"],
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-        }
+        },
     )
 
 
 @app.exception_handler(DuplicateUserError)
 async def duplicate_user_error_handler(request: Request, exc: DuplicateUserError):
-    loggerChat.warning(f"Registration failed: username duplicate")
+    loggerChat.warning("Registration failed: username duplicate")
     return JSONResponse(
         status_code=exc.status_code,
         headers=exc.headers,
@@ -56,7 +51,7 @@ async def duplicate_user_error_handler(request: Request, exc: DuplicateUserError
             "detail": exc.detail,
             "error_code": exc.headers["X-Error-Code"],
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-        }
+        },
     )
 
 
@@ -70,16 +65,16 @@ async def changing_password_error_handler(request: Request, exc: ChangingPasswor
             "detail": exc.detail,
             "error_code": exc.headers["X-Error-Code"],
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
-        }
+        },
     )
 
 
 app.add_middleware(
-    CORSMiddleware, 
+    CORSMiddleware,
     allow_origins=["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "PATCH"],
-    allow_headers=["*"]
+    allow_headers=["*"],
 )
 
-app.include_router(router, prefix='/api')
+app.include_router(router, prefix="/api")

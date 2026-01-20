@@ -43,7 +43,7 @@ export function Layout() {
         try {
             const resp = await makeRequest("change-password", {
                 method: "PATCH",
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     username: username,
                     old_password: oldPassword,
                     new_password: newPassword

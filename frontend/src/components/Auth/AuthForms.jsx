@@ -10,14 +10,14 @@ export function SignInForm() {
     const [error, setError] = useState("")
 
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
-    
+
     const onSubmit = async (e) => {
         e.preventDefault()
         if (!form.username.trim() || !form.password.trim()) {
             setError("Username and password are required")
             return
         }
-        
+
         setError("")
         setLoading(true)
         try {
@@ -34,21 +34,21 @@ export function SignInForm() {
             <h2>Sign In</h2>
             <label>
                 <span>Username</span>
-                <input 
-                    name="username" 
-                    value={form.username} 
-                    onChange={onChange} 
+                <input
+                    name="username"
+                    value={form.username}
+                    onChange={onChange}
                     autoComplete="username"
                     required
                 />
             </label>
             <label>
                 <span>Password</span>
-                <input 
-                    type="password" 
-                    name="password" 
-                    value={form.password} 
-                    onChange={onChange} 
+                <input
+                    type="password"
+                    name="password"
+                    value={form.password}
+                    onChange={onChange}
                     autoComplete="current-password"
                     required
                 />
@@ -71,19 +71,19 @@ export function SignUpForm() {
     const [error, setError] = useState("")
 
     const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
-    
+
     const onSubmit = async (e) => {
         e.preventDefault()
         if (!form.username.trim() || !form.password.trim()) {
             setError("Username and password are required")
             return
         }
-        
+
         if (form.password.length < 8) {
             setError("Password must be at least 8 characters")
             return
         }
-        
+
         setError("")
         setLoading(true)
         try {
@@ -100,21 +100,21 @@ export function SignUpForm() {
             <h2>Sign Up</h2>
             <label>
                 <span>Username</span>
-                <input 
-                    name="username" 
-                    value={form.username} 
-                    onChange={onChange} 
+                <input
+                    name="username"
+                    value={form.username}
+                    onChange={onChange}
                     autoComplete="username"
                     required
                 />
             </label>
             <label>
                 <span>Password</span>
-                <input 
-                    type="password" 
-                    name="password" 
-                    value={form.password} 
-                    onChange={onChange} 
+                <input
+                    type="password"
+                    name="password"
+                    value={form.password}
+                    onChange={onChange}
                     autoComplete="new-password"
                     required
                 />
@@ -129,5 +129,3 @@ export function SignUpForm() {
         </form>
     )
 }
-
-

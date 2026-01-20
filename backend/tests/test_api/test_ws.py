@@ -9,7 +9,7 @@ def test_ws(app: FastAPI):
     with client1.websocket_connect("/api/ws?username=testname1") as websocket1:
         data1 = websocket1.receive_json()
         assert data1["userlist"] == ["testname1"]
-        
+
         with client2.websocket_connect("/api/ws?username=testname2") as websocket2:
             data1 = websocket1.receive_json()
             data2 = websocket2.receive_json()
@@ -27,7 +27,6 @@ def test_ws(app: FastAPI):
 
             assert received_text1 == "Hello there"
             assert received_text2 == "Hi"
-        
+
         data1 = websocket1.receive_json()
         assert data1["userlist"] == ["testname1"]
-

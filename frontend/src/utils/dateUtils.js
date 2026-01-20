@@ -13,6 +13,6 @@ export function parseTimestamp(timestamp) {
 export function shouldShowDateHeader(currentDate, previousDate) {
     if (!currentDate) return false;
     if (!previousDate) return true;
-    
+
     return currentDate.toDateString() !== previousDate.toDateString();
 }

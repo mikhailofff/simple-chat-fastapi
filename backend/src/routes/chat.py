@@ -1,53 +1,49 @@
-from typing import Annotated
 import json
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Body, WebSocket, WebSocketDisconnect, Response, Cookie
-from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.ext.asyncio.session import AsyncSession
-from secure import Secure
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Query, Response, WebSocket, WebSocketDisconnect
 from fastapi.encoders import jsonable_encoder
+from fastapi.security import OAuth2PasswordRequestForm
 from redis.asyncio.client import Redis
+from secure import Secure
+from sqlalchemy.ext.asyncio.session import AsyncSession
 
+from ..core.redis_client import get_redis_connection
 from ..database.db import (
     authenticate_user,
+    change_password_in_db,
+    create_message,
     create_user,
+    delete_message_from_db,
     get_db,
     get_paginated_messages,
-    create_message,
-    delete_message_from_db,
     update_message_from_db,
-    change_password_in_db
 )
-
+from ..dependencies import get_current_user, limiter
 from ..schemas.message import (
-    MessageListResponse,
     CreateMessageRequest,
     CreateMessageResponse,
     DeleteMessageRequest,
     DeleteMessageResponse,
+    MessageListResponse,
     UpdateMessageRequest,
-    UpdateMessageResponse
+    UpdateMessageResponse,
 )
 from ..schemas.user import (
     AccessTokenResponse,
+    ChangeUserPasswordRequest,
+    ChangeUserPasswordResponse,
     RefreshTokenResponse,
     UserRequest,
     UserResponse,
-    ChangeUserPasswordRequest,
-    ChangeUserPasswordResponse
 )
-
-from ..core.redis_client import get_redis_connection
-
 from ..utils import create_access_token, create_refresh_token, verify_token
-
-from ..dependencies import limiter, get_current_user
-
 
 CACHE_MESSAGES_PREFIX = "chat:messages:"
 
 logger = logging.getLogger(__name__)
+
 
 class ConnectionManager:
     def __init__(self):
@@ -79,15 +75,15 @@ router = APIRouter()
 secure_headers = Secure.with_default_headers()
 
 
-@router.post('/sign-up', response_model=UserResponse, dependencies=[Depends(limiter)])
+@router.post("/sign-up", response_model=UserResponse, dependencies=[Depends(limiter)])
 async def sign_up(
-    response: Response, 
+    response: Response,
     user: Annotated[UserRequest, Body],
     session: Annotated[AsyncSession, Depends(get_db)],
 ):
-    '''
+    """
     Register a new user account.
-    '''
+    """
     secure_headers.set_headers(response)
 
     user = await create_user(session, user.username, user.password)
@@ -97,15 +93,15 @@ async def sign_up(
     return user_response
 
 
-@router.post('/token', response_model=AccessTokenResponse, dependencies=[Depends(limiter)])
+@router.post("/token", response_model=AccessTokenResponse, dependencies=[Depends(limiter)])
 async def login_for_access_and_refresh_token(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    session: Annotated[AsyncSession, Depends(get_db)]
+    session: Annotated[AsyncSession, Depends(get_db)],
 ):
-    '''
+    """
     Authenticate user and return JWT access and refresh token.
-    '''
+    """
     secure_headers.set_headers(response)
 
     user = await authenticate_user(session, form_data.username, form_data.password)
@@ -114,70 +110,63 @@ async def login_for_access_and_refresh_token(
     token_response = AccessTokenResponse(access_token=access_token, refresh_token=refresh_token, token_type="bearer")
 
     logger.info("User authenticated")
-    response.set_cookie(
-        key="refresh_token",
-        value=refresh_token,
-        httponly=True,
-        secure=True,
-        samesite="Lax"
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="Lax")
+    return token_response
+
+
+@router.post("/refresh", response_model=RefreshTokenResponse, dependencies=[Depends(limiter)])
+async def refresh_access_token(response: Response, refresh_token: Annotated[str | None, Cookie()] = None):
+    """
+    Refresh access token and return it
+    """
+    secure_headers.set_headers(response)
+
+    payload = verify_token(refresh_token)
+    token_response = RefreshTokenResponse(
+        access_token=create_access_token({"sub": payload.get("sub")}), token_type="bearer"
     )
     return token_response
 
 
-@router.post('/refresh', response_model=RefreshTokenResponse, dependencies=[Depends(limiter)])
-async def refresh_access_token(
-    response: Response,
-    refresh_token: Annotated[str | None, Cookie()] = None
-):
-    '''
-    Refresh access token and return it
-    '''
-    secure_headers.set_headers(response)
-
-    payload = verify_token(refresh_token)
-    token_response = RefreshTokenResponse(access_token=create_access_token({"sub": payload.get("sub")}), token_type="bearer")
-    return token_response
-
-
-@router.patch('/change-password', response_model=ChangeUserPasswordResponse, dependencies=[Depends(limiter)])
+@router.patch("/change-password", response_model=ChangeUserPasswordResponse, dependencies=[Depends(limiter)])
 async def change_password(
     response: Response,
     request: Annotated[ChangeUserPasswordRequest, Body],
-    session: Annotated[AsyncSession, Depends(get_db)]
+    session: Annotated[AsyncSession, Depends(get_db)],
 ):
-    '''
+    """
     Change user password.
     Validates old password and updates to new password.
-    '''
+    """
     secure_headers.set_headers(response)
 
     success = await change_password_in_db(session, request.username, request.old_password, request.new_password)
-    
+
     logger.info("Password changed")
     return ChangeUserPasswordResponse(success=success)
 
 
-@router.get('/messages', response_model=MessageListResponse, dependencies=[Depends(limiter), Depends(get_current_user)])
+@router.get("/messages", response_model=MessageListResponse, dependencies=[Depends(limiter), Depends(get_current_user)])
 async def get_messages(
-    response: Response, 
+    response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     first_id: Annotated[int | None, Query()] = None,
-    limit : Annotated[int, Query()] = 20
+    limit: Annotated[int, Query()] = 20,
 ):
-    '''
+    """
     Retrieve all messages from the chat.
     Returns a list of all messages with their details including id, sender, content, and timestamp.
     Results are cached in Redis for 1 hour.
-    '''
+    """
     secure_headers.set_headers(response)
 
     cache_key_messages = CACHE_MESSAGES_PREFIX + "last_messages"
     if first_id:
         if first_id - 20 < 0:
-            cache_key_messages = CACHE_MESSAGES_PREFIX + "1-" + str(first_id-1)
+            cache_key_messages = CACHE_MESSAGES_PREFIX + "1-" + str(first_id - 1)
         else:
-            cache_key_messages = CACHE_MESSAGES_PREFIX + str(first_id-20) + "-" + str(first_id-1)
+            cache_key_messages = CACHE_MESSAGES_PREFIX + str(first_id - 20) + "-" + str(first_id - 1)
 
     cached_messages_json = await redis_connection.get(cache_key_messages)
 
@@ -189,11 +178,10 @@ async def get_messages(
 
     try:
         messages = await get_paginated_messages(session, first_id, limit)
-        messages_response = MessageListResponse(
-            messages=[message.to_pydantic() for message in messages]
-        )
+        messages_response = MessageListResponse(messages=[message.to_pydantic() for message in messages])
         serialized = (
-            messages_response.model_dump_json() if hasattr(messages_response, 'model_dump_json')
+            messages_response.model_dump_json()
+            if hasattr(messages_response, "model_dump_json")
             else json.dumps(jsonable_encoder(messages_response))
         )
         await redis_connection.set(cache_key_messages, serialized, ex=3600)
@@ -206,18 +194,20 @@ async def get_messages(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post('/send-message', response_model=CreateMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)])
+@router.post(
+    "/send-message", response_model=CreateMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)]
+)
 async def send_message(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     message_request: Annotated[CreateMessageRequest, Body],
 ):
-    '''
+    """
     Create and send a new message to the chat.
     Validates message content and stores it in the database.
     Returns the ID of the created message. Invalidates message cache.
-    '''
+    """
     secure_headers.set_headers(response)
 
     try:
@@ -239,18 +229,20 @@ async def send_message(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete('/delete-message', response_model=DeleteMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)])
+@router.delete(
+    "/delete-message", response_model=DeleteMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)]
+)
 async def delete_message(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     message_request: Annotated[DeleteMessageRequest, Query()],
 ):
-    '''
+    """
     Delete a specific message from the chat by its ID.
     Returns success status indicating whether the message was deleted.
     Invalidates message cache.
-    '''
+    """
     secure_headers.set_headers(response)
 
     try:
@@ -265,18 +257,20 @@ async def delete_message(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch('/update-message', response_model=UpdateMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)])
+@router.patch(
+    "/update-message", response_model=UpdateMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)]
+)
 async def update_message(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     message_request: Annotated[UpdateMessageRequest, Body],
 ):
-    '''
+    """
     Update content field of a specific message from the chat by its ID.
     Returns success status indicating whether the message was updated.
     Invalidates message cache.
-    '''
+    """
     secure_headers.set_headers(response)
 
     try:
@@ -284,8 +278,8 @@ async def update_message(
 
         keys = []
         async for key in redis_connection.scan_iter("chat:messages:*-*"):
-            words = key.split(':')
-            range = words[-1].split('-')
+            words = key.split(":")
+            range = words[-1].split("-")
             keys.append((int(range[-2]), int(range[-1])))
 
         cache_key_messages = CACHE_MESSAGES_PREFIX + "last_messages"
@@ -310,19 +304,15 @@ async def update_message(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.websocket('/ws')
-async def websocket_endpoint(
-    response: Response,
-    websocket: WebSocket,
-    username: Annotated[str, Query]
-):
-    '''
+@router.websocket("/ws")
+async def websocket_endpoint(response: Response, websocket: WebSocket, username: Annotated[str, Query]):
+    """
     WebSocket endpoint for real-time chat functionality.
     Establishes connection for live message broadcasting and user status updates.
     Requires username as query parameter for user identification.
-    '''
+    """
     secure_headers.set_headers(response)
-    
+
     logger.info(f"WebSocket connection attempt for user: {username}")
     await manager.connect(websocket, username)
     try:
@@ -335,4 +325,3 @@ async def websocket_endpoint(
     except Exception as e:
         logger.error(f"WebSocket error for user {username}: {e}")
         await manager.disconnect(websocket)
-

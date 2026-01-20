@@ -5,12 +5,12 @@ export default function ChatMessages({ messages, user, messagesEndRef, onDeleteM
     return (
         <div className={styles['messages']}>
             {messages.map((msg, index) => (
-                <Message 
+                <Message
                     key={msg.id || index}
                     user={user}
                     text={msg.text}
                     sender={msg.sender}
-                    timestamp={msg.timestamp} 
+                    timestamp={msg.timestamp}
                     updatedAt={msg.updatedAt}
                     messageId={msg.id}
                     onDelete={onDeleteMessage}
@@ -21,4 +21,3 @@ export default function ChatMessages({ messages, user, messagesEndRef, onDeleteM
         </div>
     );
 }
-

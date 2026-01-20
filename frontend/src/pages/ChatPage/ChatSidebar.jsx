@@ -7,7 +7,7 @@ export default function ChatSidebar({ onlineUsers, userlist }) {
             <div className={styles['online-users']}>
                 <span className={styles['online-users-label']}>Online Users ({onlineUsers})</span>
             </div>
-            
+
             <hr className={styles['userlist-separator']} />
 
             <div className={styles['userlist']}>

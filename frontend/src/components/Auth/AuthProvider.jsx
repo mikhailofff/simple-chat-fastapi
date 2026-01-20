@@ -29,18 +29,18 @@ export function AuthProvider({ children }) {
         try {
             const response = await fetch(API_BASE_URL + "refresh", {
                 method: "POST",
-                credentials: "include", 
+                credentials: "include",
             });
 
             if (response.ok) {
                 const data = await response.json();
-                setToken(data.access_token); 
+                setToken(data.access_token);
                 return data.access_token;
             }
         } catch (error) {
             console.error("Refresh failed", error);
         }
-        
+
         signOut();
         return null;
     }, [signOut]);
@@ -63,7 +63,7 @@ export function AuthProvider({ children }) {
 
         return response;
     }, [token, refreshToken]);
-    
+
     const [user, setUser] = useState(() => {
         const stored = localStorage.getItem("auth_user")
         return stored ? JSON.parse(stored) : null
@@ -126,13 +126,13 @@ export function AuthProvider({ children }) {
         return true
     }, [signIn])
 
-    const value = useMemo(() => ({ 
-        token, 
+    const value = useMemo(() => ({
+        token,
         setToken,
-        user, 
-        isAuthenticated: Boolean(token), 
-        signIn, 
-        signUp, 
+        user,
+        isAuthenticated: Boolean(token),
+        signIn,
+        signUp,
         signOut,
         refreshToken
     }), [token, user, signIn, signUp, signOut, refreshToken])
@@ -145,5 +145,3 @@ export function useAuth() {
     if (!ctx) throw new Error("useAuth must be used within AuthProvider")
     return ctx
 }
-
-

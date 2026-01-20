@@ -1,10 +1,10 @@
-import pytest
 from datetime import timedelta
 from time import sleep
 
-from src.utils import create_jwt_token, create_access_token, create_refresh_token, verify_token
+import pytest
 
 from src.exceptions import AuthenticationError
+from src.utils import create_access_token, create_jwt_token, create_refresh_token, verify_token
 
 
 def test_create_jwt_token():

@@ -63,10 +63,10 @@ export default function Message({ user, text, sender, timestamp, updatedAt, onDe
     }
 
     return (
-        <div 
+        <div
             className={styles.message}
             onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}    
+            onMouseLeave={() => setIsHovered(false)}
             style={{ position: 'relative' }}
         >
             {isHovered && (user === sender) && !isEditing && (

@@ -49,19 +49,19 @@ A modern, real-time chat application built with React, FastAPI, and WebSocket te
    ```
 
 2. **Set up environment variables**
-   
+
    Copy the example environment files and configure them:
-   
+
    **Backend:**
    ```bash
    cp backend/src/.env.example backend/src/.env
    ```
-   
+
    **Frontend:**
    ```bash
    cp frontend/.env.example frontend/.env
    ```
-   
+
    Then edit both `.env` files with your actual values.
 
 3. **Start the application**
@@ -70,7 +70,7 @@ A modern, real-time chat application built with React, FastAPI, and WebSocket te
    ```
 
 4. **Access the application**
-   
+
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs

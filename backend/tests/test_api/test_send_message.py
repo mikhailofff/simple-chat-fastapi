@@ -1,10 +1,11 @@
-import pytest
-import httpx
 from datetime import datetime
 
-from ..conftest import create_expired_token
+import httpx
+import pytest
 
 from src.schemas.config import settings
+
+from ..conftest import create_expired_token
 
 
 @pytest.mark.order(after="tests/test_api/test_token.py::test_token_with_unauthorized_username")
@@ -15,14 +16,10 @@ async def test_send_message(async_client: httpx.AsyncClient):
         "content": "Hello world!",
         "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
-        "created_by": "testname"
+        "created_by": "testname",
     }
     response = await async_client.post(
-        "/api/send-message",
-        json=message_request,
-        headers={
-            "Authorization": f"Bearer {access_token}"
-        }
+        "/api/send-message", json=message_request, headers={"Authorization": f"Bearer {access_token}"}
     )
 
     assert response.status_code == 200
@@ -37,12 +34,9 @@ async def test_send_message_as_unauthorized(async_client: httpx.AsyncClient):
         "content": "Hello world!",
         "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
-        "created_by": "testname"
+        "created_by": "testname",
     }
-    response = await async_client.post(
-        "/api/send-message",
-        json=message_request
-    )
+    response = await async_client.post("/api/send-message", json=message_request)
 
     assert response.status_code == 401
 
@@ -55,14 +49,10 @@ async def test_send_message_with_invalid_token(async_client: httpx.AsyncClient):
         "content": "Hello world!",
         "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
-        "created_by": "testname"
+        "created_by": "testname",
     }
     response = await async_client.post(
-        "/api/send-message",
-        json=message_request,
-        headers={
-            "Authorization": f"Bearer {access_token}"
-        }
+        "/api/send-message", json=message_request, headers={"Authorization": f"Bearer {access_token}"}
     )
 
     assert response.status_code == 401
@@ -77,14 +67,10 @@ async def test_send_message_with_expired_token(async_client: httpx.AsyncClient):
         "content": "Hello world!",
         "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
         "updated_at": None,
-        "created_by": "testname"
+        "created_by": "testname",
     }
     response = await async_client.post(
-        "/api/send-message",
-        json=message_request,
-        headers={
-            "Authorization": f"Bearer {expired_token}"
-        }
+        "/api/send-message", json=message_request, headers={"Authorization": f"Bearer {expired_token}"}
     )
 
     assert response.status_code == 401

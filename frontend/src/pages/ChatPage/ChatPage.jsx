@@ -39,7 +39,7 @@ export function Chat() {
 	);
 	const { ws, sendMessage, userlist } = useWebSocket({
 		username: username,
-		onMessage, 
+		onMessage,
 		onOnlineCount,
 		hasTodayMessagesRef
 	  });
@@ -69,25 +69,25 @@ export function Chat() {
 					});
 				})
 				setMessages(prev => {
-					const combined = [...prev, ...formattedMessages]; 
+					const combined = [...prev, ...formattedMessages];
 					return insertDateHeaders(combined);
 				});
 
 				setTimeout(() => {
 					messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
-				}, 100);                  
+				}, 100);
 			} catch (err) {
 				console.error("Error with receiving the messages:", err.message || "Didn't manage to load the messages.");
 			}
 		};
-	
+
 		loadMessages();
 	}, []);
 
 	useEffect(() => {
 		messagesRef.current = messages;
 	}, [messages]);
-	
+
 	useEffect(() => {
 		const prevMessages = prevMessagesRef.current;
     	const currentMessages = messages;
@@ -97,7 +97,7 @@ export function Chat() {
 				messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end", inline: "nearest" });
 			}, 100);
 		}
-		
+
 		prevMessagesRef.current = messages;
 	}, [messages,  username]);
 
@@ -112,9 +112,9 @@ export function Chat() {
 
 	const loadOlderMessages = async () => {
 		setLoading(true);
-		const firstMessage = messagesRef.current[1]; 
+		const firstMessage = messagesRef.current[1];
 		const firstId = firstMessage ? firstMessage.id : null;
-	
+
 		try {
 			const params = new URLSearchParams();
 			if (firstId !== null) params.append('first_id', firstId);
@@ -131,11 +131,11 @@ export function Chat() {
 				updatedAt: element.updated_at ? parseTimestamp(element.updated_at).toLocaleTimeString() : null,
 				sender: element.created_by,
 			  }));
-	
+
 			if (olderMessages.length < 20) {
 				setHasMore(false);
 			}
-	
+
 			setMessages(prev => {
 				const combined = [...olderMessages, ...prev];
 				return insertDateHeaders(combined);
@@ -163,23 +163,23 @@ export function Chat() {
 		const filteredMessages = messages.filter(msg => msg.sender !== '<DateHeader>');
 		const result = [];
 		let lastDateString = null;
-	  
+
 		filteredMessages.forEach((msg) => {
 			const messageDate = parseTimestamp(msg.created_at);
 		  	if (!messageDate || isNaN(messageDate.getTime())) {
 				result.push(msg);
 				return;
 		  	}
-		  
+
 		  	const messageDateStr = messageDate.toDateString();
-	  
+
 			if (messageDateStr !== lastDateString) {
 				let timestamp;
-				
+
 				const today = new Date();
 				const yesterday = new Date(today);
 				yesterday.setDate(yesterday.getDate() - 1);
-		
+
 				if (messageDateStr === today.toDateString()) {
 					timestamp = 'Today';
 				} else if (messageDateStr === yesterday.toDateString()) {
@@ -187,7 +187,7 @@ export function Chat() {
 				} else {
 					timestamp = messageDate.toLocaleDateString('en-US');
 				}
-	  
+
 				result.push({
 					text: null,
 					timestamp: timestamp,
@@ -195,10 +195,10 @@ export function Chat() {
 				});
 				lastDateString = messageDateStr;
 		  	}
-	  
+
 		  	result.push(msg);
 		});
-		
+
 		return result;
 	}
 
@@ -278,8 +278,8 @@ export function Chat() {
 				}),
 			});
 			const nowLabel = new Date().toLocaleTimeString();
-			setMessages(prev => prev.map(message => 
-				message.id === messageId 
+			setMessages(prev => prev.map(message =>
+				message.id === messageId
 					? { ...message, text: newContent, updatedAt: nowLabel }
 					: message
 			));
@@ -292,7 +292,7 @@ export function Chat() {
 		<div className={styles['chat-main-layout']}>
 			<div className={styles['chat-container']}>
 				<div className={styles['messages-wrapper']} ref={chatContainerRef}>
-					<ChatMessages 
+					<ChatMessages
 						messages={messages}
 						user={username}
 						messagesEndRef={messagesEndRef}

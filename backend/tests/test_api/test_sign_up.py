@@ -1,13 +1,10 @@
-import pytest
 import httpx
+import pytest
 
 
 @pytest.mark.asyncio
 async def test_sign_up(async_client: httpx.AsyncClient):
-    data = {
-        "username": "testname",
-        "password": "testpassword"
-    }
+    data = {"username": "testname", "password": "testpassword"}
     response = await async_client.post(url="/api/sign-up", json=data)
 
     assert response.status_code == 200
@@ -20,10 +17,7 @@ async def test_sign_up(async_client: httpx.AsyncClient):
 
 @pytest.mark.asyncio
 async def test_sign_up_with_same_username(async_client: httpx.AsyncClient):
-    data = {
-        "username": "testname",
-        "password": "testpassword"
-    }
+    data = {"username": "testname", "password": "testpassword"}
     response = await async_client.post(url="/api/sign-up", json=data)
 
     assert response.status_code == 409

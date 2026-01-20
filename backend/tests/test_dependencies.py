@@ -1,11 +1,11 @@
-import pytest
 from datetime import timedelta
 from time import sleep
 
-from src.utils import create_jwt_token, create_access_token
-from src.dependencies import get_current_user
+import pytest
 
+from src.dependencies import get_current_user
 from src.exceptions import AuthenticationError
+from src.utils import create_access_token, create_jwt_token
 
 
 def test_get_current_user():
