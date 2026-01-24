@@ -16,7 +16,6 @@ A modern, real-time chat application built with React, FastAPI, and WebSocket te
 - **React 19** - Modern React with hooks
 - **Vite** - Fast build tool and dev server
 - **JWT** - Authentication and user management
-- **CSS Modules** - Scoped styling
 
 ### Backend
 - **FastAPI** - Modern Python web framework
@@ -24,10 +23,8 @@ A modern, real-time chat application built with React, FastAPI, and WebSocket te
 - **PostgreSQL** - Primary database
 - **Redis** - Caching and session management
 - **WebSocket** - Real-time bidirectional communication
- - **Uvicorn** - ASGI server
  - **Alembic** - Database migrations
  - **fastapi-limiter** - Rate limiting backed by Redis
- - **Python logging** - Centralized app logging
 
 ## 🖼️ Screenshots
 
@@ -44,7 +41,7 @@ A modern, real-time chat application built with React, FastAPI, and WebSocket te
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/mikhailofficial/simple-chat-fastapi.git
+   git clone https://github.com/mikhailofff/simple-chat-fastapi.git
    cd simple-chat-fastapi
    ```
 
@@ -52,17 +49,11 @@ A modern, real-time chat application built with React, FastAPI, and WebSocket te
 
    Copy the example environment files and configure them:
 
-   **Backend:**
    ```bash
    cp backend/src/.env.example backend/src/.env
    ```
 
-   **Frontend:**
-   ```bash
-   cp frontend/.env.example frontend/.env
-   ```
-
-   Then edit both `.env` files with your actual values.
+   Then edit `.env` file with your actual values.
 
 3. **Start the application**
    ```bash
@@ -109,8 +100,6 @@ simple-chat-fastapi/
 │   │   ├── pages/              # Page components
 │   │   └── hooks/              # Custom React hooks
 │   ├── package.json            # Node.js dependencies
-│   ├── .env.example            # Environment variables template
-│   ├── .env                    # Your environment variables (not in git)
 │   └── Dockerfile              # Frontend container
 └── docker-compose.yaml         # Multi-container setup
 ```
