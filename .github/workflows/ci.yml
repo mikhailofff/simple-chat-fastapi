@@ -17,10 +17,15 @@ jobs:
           python-version: "3.13"
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+      - name: Create .env from example
+        run: |
+          cp backend/src/.env.example backend/src/.env
       - name: Install dependencies
         run: |
           cd backend
           uv sync --frozen
+          pip install --upgrade pip
+          pip install -e .
       - name: Test with pytest
         run: pytest backend/tests
       - name: Run pre-commit
