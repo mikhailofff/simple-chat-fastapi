@@ -1,6 +1,7 @@
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
+from typing import AsyncGenerator
 
 import jwt
 import pytest_asyncio
@@ -85,7 +86,7 @@ async def app(db, redis_connection) -> FastAPI:
 
 
 @pytest_asyncio.fixture(scope="session")
-async def async_client(app: FastAPI) -> AsyncClient:
+async def async_client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
     async with LifespanManager(app) as manager:
         async with AsyncClient(transport=ASGITransport(app=manager.app), base_url="http://test") as client:
             yield client
