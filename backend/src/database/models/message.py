@@ -14,7 +14,7 @@ class Message(Base):
     updated_at = Column(type_=TIMESTAMP(timezone=True), default=None)
     created_by = Column(String, nullable=False)
 
-    def to_pydantic(self):
+    def to_pydantic(self) -> MessageListResponse.MessageListResponseItem:
         return MessageListResponse.MessageListResponseItem(
             id=self.id,
             content=self.content,

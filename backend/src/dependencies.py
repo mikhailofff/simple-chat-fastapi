@@ -12,7 +12,7 @@ limiter = RateLimiter(times=100, seconds=60)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/token")
 
 
-def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> TokenData:
     payload = verify_token(token)
     username = payload.get("sub")
 

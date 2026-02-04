@@ -1,15 +1,17 @@
 import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
-from typing import AsyncGenerator
+from typing import Any, AsyncGenerator
 
+import fakeredis
 import jwt
 import pytest_asyncio
 from asgi_lifespan import LifespanManager
+from fakeredis import FakeRedis
 from fastapi import FastAPI
 from fastapi_limiter import FastAPILimiter
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from src.core.redis_client import get_redis_connection
 from src.database.db import get_db
@@ -36,16 +38,14 @@ TestingAsyncSessionLocal = async_sessionmaker(
 
 
 @pytest_asyncio.fixture(scope="session")
-async def redis_connection():
-    import fakeredis
-
+async def redis_connection() -> AsyncGenerator[FakeRedis, Any]:
     redis_connection = fakeredis.FakeAsyncRedis()
     yield redis_connection
     await redis_connection.aclose()
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def cleanup_db():
+async def cleanup_db() -> None:
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -55,7 +55,7 @@ async def cleanup_db():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def db():
+async def db() -> AsyncGenerator[AsyncSession, None]:
     async with TestingAsyncSessionLocal() as session:
         try:
             yield session
@@ -65,9 +65,9 @@ async def db():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def app(db, redis_connection) -> FastAPI:
+async def app(db: AsyncSession, redis_connection: FakeRedis) -> FastAPI:
     @asynccontextmanager
-    async def test_lifespan(_: FastAPI):
+    async def test_lifespan(_: FastAPI) -> AsyncGenerator[None, Any]:
         await FastAPILimiter.init(redis_connection)
         yield
         await FastAPILimiter.close()
@@ -75,7 +75,7 @@ async def app(db, redis_connection) -> FastAPI:
     app = FastAPI(lifespan=test_lifespan)
     app.include_router(router, prefix="/api")
 
-    async def override_get_session():
+    async def override_get_session() -> AsyncGenerator[AsyncSession, Any]:
         async with TestingAsyncSessionLocal() as session:
             yield session
 
@@ -92,7 +92,7 @@ async def async_client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
             yield client
 
 
-def create_expired_token(data: dict[str, str], secret_key: str):
+def create_expired_token(data: dict[str, str], secret_key: str) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) - timedelta(days=1)
     to_encode.update({"exp": expire})

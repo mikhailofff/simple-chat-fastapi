@@ -8,7 +8,7 @@ from ..conftest import create_expired_token
 
 @pytest.mark.order(after="tests/test_api/test_messages.py::test_messages_not_empty")
 @pytest.mark.asyncio
-async def test_update_message(async_client: httpx.AsyncClient):
+async def test_update_message(async_client: httpx.AsyncClient) -> None:
     access_token = async_client.cookies.get("access_token")
     message_request = {"id": "1", "content": "Bye world!"}
 
@@ -23,7 +23,7 @@ async def test_update_message(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_update_message")
 @pytest.mark.asyncio
-async def test_update_unknown_message(async_client: httpx.AsyncClient):
+async def test_update_unknown_message(async_client: httpx.AsyncClient) -> None:
     access_token = async_client.cookies.get("access_token")
     message_request = {"id": "2", "content": "Bye world!"}
 
@@ -36,7 +36,7 @@ async def test_update_unknown_message(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_update_unknown_message")
 @pytest.mark.asyncio
-async def test_update_message_as_unauthorized(async_client: httpx.AsyncClient):
+async def test_update_message_as_unauthorized(async_client: httpx.AsyncClient) -> None:
     message_request = {"id": "1", "content": "Bye world!"}
 
     response = await async_client.patch("/api/update-message", params=message_request)
@@ -46,7 +46,7 @@ async def test_update_message_as_unauthorized(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_update_message_as_unauthorized")
 @pytest.mark.asyncio
-async def test_update_message_with_invalid_token(async_client: httpx.AsyncClient):
+async def test_update_message_with_invalid_token(async_client: httpx.AsyncClient) -> None:
     access_token = "invalid_token"
     message_request = {"id": "1", "content": "Bye world!"}
 
@@ -59,7 +59,7 @@ async def test_update_message_with_invalid_token(async_client: httpx.AsyncClient
 
 @pytest.mark.order(after="test_update_message_with_invalid_token")
 @pytest.mark.asyncio
-async def test_update_message_with_expired_token(async_client: httpx.AsyncClient):
+async def test_update_message_with_expired_token(async_client: httpx.AsyncClient) -> None:
     expired_token = create_expired_token({"sub": "testname"}, settings.SECRET_KEY)
     message_request = {"id": "1", "content": "Bye world!"}
 

@@ -10,7 +10,7 @@ from ..conftest import create_expired_token
 
 @pytest.mark.order(after="tests/test_api/test_token.py::test_token_with_unauthorized_username")
 @pytest.mark.asyncio
-async def test_send_message(async_client: httpx.AsyncClient):
+async def test_send_message(async_client: httpx.AsyncClient) -> None:
     access_token = async_client.cookies.get("access_token")
     message_request = {
         "content": "Hello world!",
@@ -29,7 +29,7 @@ async def test_send_message(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_send_message")
 @pytest.mark.asyncio
-async def test_send_message_as_unauthorized(async_client: httpx.AsyncClient):
+async def test_send_message_as_unauthorized(async_client: httpx.AsyncClient) -> None:
     message_request = {
         "content": "Hello world!",
         "created_at": datetime(2026, 1, 1, 0, 0, 0).isoformat(),
@@ -43,7 +43,7 @@ async def test_send_message_as_unauthorized(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_send_message_as_unauthorized")
 @pytest.mark.asyncio
-async def test_send_message_with_invalid_token(async_client: httpx.AsyncClient):
+async def test_send_message_with_invalid_token(async_client: httpx.AsyncClient) -> None:
     access_token = "invalid_token"
     message_request = {
         "content": "Hello world!",
@@ -60,7 +60,7 @@ async def test_send_message_with_invalid_token(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_send_message_with_invalid_token")
 @pytest.mark.asyncio
-async def test_send_message_with_expired_token(async_client: httpx.AsyncClient):
+async def test_send_message_with_expired_token(async_client: httpx.AsyncClient) -> None:
     expired_token = create_expired_token({"sub": "testname"}, settings.SECRET_KEY)
 
     message_request = {

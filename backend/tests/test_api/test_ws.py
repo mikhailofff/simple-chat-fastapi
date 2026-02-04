@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 
-def test_ws(app: FastAPI):
+def test_ws(app: FastAPI) -> None:
     client1 = TestClient(app)
     client2 = TestClient(app)
 

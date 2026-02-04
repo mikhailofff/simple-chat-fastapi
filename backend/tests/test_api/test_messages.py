@@ -10,7 +10,7 @@ from ..conftest import create_expired_token
 
 @pytest.mark.order(after="tests/test_api/test_token.py::test_token_with_unauthorized_username")
 @pytest.mark.asyncio
-async def test_messages_empty(async_client: httpx.AsyncClient):
+async def test_messages_empty(async_client: httpx.AsyncClient) -> None:
     access_token = async_client.cookies.get("access_token")
     response = await async_client.get("/api/messages", headers={"Authorization": f"Bearer {access_token}"})
 
@@ -21,7 +21,7 @@ async def test_messages_empty(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_messages_empty")
 @pytest.mark.asyncio
-async def test_messages_as_unauthorized(async_client: httpx.AsyncClient):
+async def test_messages_as_unauthorized(async_client: httpx.AsyncClient) -> None:
     response = await async_client.get("/api/messages")
 
     assert response.status_code == 401
@@ -29,7 +29,7 @@ async def test_messages_as_unauthorized(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_messages_as_unauthorized")
 @pytest.mark.asyncio
-async def test_messages_with_invalid_token(async_client: httpx.AsyncClient):
+async def test_messages_with_invalid_token(async_client: httpx.AsyncClient) -> None:
     access_token = "invalid_token"
     response = await async_client.get("/api/messages", headers={"Authorization": f"Bearer {access_token}"})
 
@@ -38,7 +38,7 @@ async def test_messages_with_invalid_token(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="test_messages_with_invalid_token")
 @pytest.mark.asyncio
-async def test_messages_with_expired_token(async_client: httpx.AsyncClient):
+async def test_messages_with_expired_token(async_client: httpx.AsyncClient) -> None:
     expired_token = create_expired_token({"sub": "testname"}, settings.SECRET_KEY)
 
     response = await async_client.get("/api/messages", headers={"Authorization": f"Bearer {expired_token}"})
@@ -48,7 +48,7 @@ async def test_messages_with_expired_token(async_client: httpx.AsyncClient):
 
 @pytest.mark.order(after="tests/test_api/test_send_message.py::test_send_message_with_expired_token")
 @pytest.mark.asyncio
-async def test_messages_not_empty(async_client: httpx.AsyncClient):
+async def test_messages_not_empty(async_client: httpx.AsyncClient) -> None:
     access_token = async_client.cookies.get("access_token")
     response = await async_client.get("/api/messages", headers={"Authorization": f"Bearer {access_token}"})
 

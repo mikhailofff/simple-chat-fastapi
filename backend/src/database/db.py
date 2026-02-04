@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone
+from typing import Any, AsyncGenerator, Sequence
 
 from passlib.context import CryptContext
 from sqlalchemy import select
@@ -23,7 +24,7 @@ engine = create_async_engine(
 SessionLocal = async_sessionmaker(bind=engine, autocommit=False, autoflush=False)
 
 
-async def get_db():
+async def get_db() -> AsyncGenerator[AsyncSession, Any]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     async with SessionLocal() as session:
@@ -37,7 +38,7 @@ async def get_db():
             await session.close()
 
 
-async def get_paginated_messages(session: AsyncSession, first_id: int, limit: int):
+async def get_paginated_messages(session: AsyncSession, first_id: int, limit: int) -> Sequence[Message]:
     stmt = select(Message).order_by(Message.id.desc()).limit(limit)
 
     if first_id:
@@ -49,7 +50,7 @@ async def get_paginated_messages(session: AsyncSession, first_id: int, limit: in
     return messages[::-1]
 
 
-async def create_message(session: AsyncSession, content: str, created_at: datetime, created_by: str):
+async def create_message(session: AsyncSession, content: str, created_at: datetime, created_by: str) -> Message:
     db_message = Message(content=content, created_at=created_at, created_by=created_by)
 
     session.add(db_message)
@@ -59,7 +60,7 @@ async def create_message(session: AsyncSession, content: str, created_at: dateti
     return db_message
 
 
-async def delete_message_from_db(session: AsyncSession, id: int):
+async def delete_message_from_db(session: AsyncSession, id: int) -> bool:
     stmt = select(Message).filter_by(id=id)
     result = await session.execute(stmt)
     message = result.scalar_one()
@@ -71,7 +72,7 @@ async def delete_message_from_db(session: AsyncSession, id: int):
     return False
 
 
-async def update_message_from_db(session: AsyncSession, id: int, content: str):
+async def update_message_from_db(session: AsyncSession, id: int, content: str) -> bool:
     stmt = select(Message).filter_by(id=id)
     result = await session.execute(stmt)
     message = result.scalar_one()
@@ -84,15 +85,15 @@ async def update_message_from_db(session: AsyncSession, id: int, content: str):
     return False
 
 
-def get_password_hash(password: str):
+def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
 
 
-def verify_password(plain_password: str, hashed_password: str):
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
-async def get_by_username(session: AsyncSession, username: str):
+async def get_by_username(session: AsyncSession, username: str) -> User | None:
     stmt = select(User).filter_by(username=username)
     result = await session.execute(stmt)
     user = result.scalars().first()
@@ -100,14 +101,14 @@ async def get_by_username(session: AsyncSession, username: str):
     return user
 
 
-async def authenticate_user(session: AsyncSession, username: str, password: str):
+async def authenticate_user(session: AsyncSession, username: str, password: str) -> User:
     user = await get_by_username(session, username)
     if not user or not verify_password(password, user.hashed_password):
         raise AuthenticationError()
     return user
 
 
-async def create_user(session: AsyncSession, username: str, password: str):
+async def create_user(session: AsyncSession, username: str, password: str) -> User:
     hashed_password = get_password_hash(password)
     user = User(username=username, hashed_password=hashed_password)
     try:
@@ -121,7 +122,7 @@ async def create_user(session: AsyncSession, username: str, password: str):
     return user
 
 
-async def change_password_in_db(session: AsyncSession, username: str, old_password: str, new_password: str):
+async def change_password_in_db(session: AsyncSession, username: str, old_password: str, new_password: str) -> bool:
     user = await get_by_username(session, username)
 
     if not user or not verify_password(old_password, user.hashed_password):

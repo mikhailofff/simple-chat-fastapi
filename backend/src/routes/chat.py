@@ -46,23 +46,23 @@ logger = logging.getLogger(__name__)
 
 
 class ConnectionManager:
-    def __init__(self):
+    def __init__(self) -> None:
         self.activate_connections: dict[WebSocket, str] = {}
 
-    async def connect(self, websocket: WebSocket, username: str):
+    async def connect(self, websocket: WebSocket, username: str) -> None:
         await websocket.accept()
         self.activate_connections[websocket] = username
         await self.broadcast_userlist()
 
-    async def disconnect(self, websocket: WebSocket):
+    async def disconnect(self, websocket: WebSocket) -> None:
         del self.activate_connections[websocket]
         await self.broadcast_userlist()
 
-    async def broadcast(self, message: str):
+    async def broadcast(self, message: str) -> None:
         for connection in self.activate_connections:
             await connection.send_text(message)
 
-    async def broadcast_userlist(self):
+    async def broadcast_userlist(self) -> None:
         for connection in self.activate_connections:
             message = json.dumps({"userlist": list(self.activate_connections.values())})
             await connection.send_text(message)
@@ -75,12 +75,12 @@ router = APIRouter()
 secure_headers = Secure.with_default_headers()
 
 
-@router.post("/sign-up", response_model=UserResponse, dependencies=[Depends(limiter)])
+@router.post("/sign-up", dependencies=[Depends(limiter)])
 async def sign_up(
     response: Response,
     user: Annotated[UserRequest, Body],
     session: Annotated[AsyncSession, Depends(get_db)],
-):
+) -> UserResponse:
     """
     Register a new user account.
     """
@@ -93,12 +93,12 @@ async def sign_up(
     return user_response
 
 
-@router.post("/token", response_model=AccessTokenResponse, dependencies=[Depends(limiter)])
+@router.post("/token", dependencies=[Depends(limiter)])
 async def login_for_access_and_refresh_token(
     response: Response,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     session: Annotated[AsyncSession, Depends(get_db)],
-):
+) -> AccessTokenResponse:
     """
     Authenticate user and return JWT access and refresh token.
     """
@@ -114,8 +114,10 @@ async def login_for_access_and_refresh_token(
     return token_response
 
 
-@router.post("/refresh", response_model=RefreshTokenResponse, dependencies=[Depends(limiter)])
-async def refresh_access_token(response: Response, refresh_token: Annotated[str | None, Cookie()] = None):
+@router.post("/refresh", dependencies=[Depends(limiter)])
+async def refresh_access_token(
+    response: Response, refresh_token: Annotated[str | None, Cookie()] = None
+) -> RefreshTokenResponse:
     """
     Refresh access token and return it
     """
@@ -128,12 +130,12 @@ async def refresh_access_token(response: Response, refresh_token: Annotated[str 
     return token_response
 
 
-@router.patch("/change-password", response_model=ChangeUserPasswordResponse, dependencies=[Depends(limiter)])
+@router.patch("/change-password", dependencies=[Depends(limiter)])
 async def change_password(
     response: Response,
     request: Annotated[ChangeUserPasswordRequest, Body],
     session: Annotated[AsyncSession, Depends(get_db)],
-):
+) -> ChangeUserPasswordResponse:
     """
     Change user password.
     Validates old password and updates to new password.
@@ -146,14 +148,14 @@ async def change_password(
     return ChangeUserPasswordResponse(success=success)
 
 
-@router.get("/messages", response_model=MessageListResponse, dependencies=[Depends(limiter), Depends(get_current_user)])
+@router.get("/messages", dependencies=[Depends(limiter), Depends(get_current_user)])
 async def get_messages(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     first_id: Annotated[int | None, Query()] = None,
     limit: Annotated[int, Query()] = 20,
-):
+) -> MessageListResponse:
     """
     Retrieve all messages from the chat.
     Returns a list of all messages with their details including id, sender, content, and timestamp.
@@ -194,15 +196,13 @@ async def get_messages(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post(
-    "/send-message", response_model=CreateMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)]
-)
+@router.post("/send-message", dependencies=[Depends(limiter), Depends(get_current_user)])
 async def send_message(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     message_request: Annotated[CreateMessageRequest, Body],
-):
+) -> CreateMessageResponse:
     """
     Create and send a new message to the chat.
     Validates message content and stores it in the database.
@@ -229,15 +229,13 @@ async def send_message(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.delete(
-    "/delete-message", response_model=DeleteMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)]
-)
+@router.delete("/delete-message", dependencies=[Depends(limiter), Depends(get_current_user)])
 async def delete_message(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     message_request: Annotated[DeleteMessageRequest, Query()],
-):
+) -> DeleteMessageResponse:
     """
     Delete a specific message from the chat by its ID.
     Returns success status indicating whether the message was deleted.
@@ -257,15 +255,13 @@ async def delete_message(
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@router.patch(
-    "/update-message", response_model=UpdateMessageResponse, dependencies=[Depends(limiter), Depends(get_current_user)]
-)
+@router.patch("/update-message", dependencies=[Depends(limiter), Depends(get_current_user)])
 async def update_message(
     response: Response,
     session: Annotated[AsyncSession, Depends(get_db)],
     redis_connection: Annotated[Redis, Depends(get_redis_connection)],
     message_request: Annotated[UpdateMessageRequest, Body],
-):
+) -> UpdateMessageResponse:
     """
     Update content field of a specific message from the chat by its ID.
     Returns success status indicating whether the message was updated.
@@ -305,7 +301,7 @@ async def update_message(
 
 
 @router.websocket("/ws")
-async def websocket_endpoint(response: Response, websocket: WebSocket, username: Annotated[str, Query]):
+async def websocket_endpoint(response: Response, websocket: WebSocket, username: Annotated[str, Query]) -> None:
     """
     WebSocket endpoint for real-time chat functionality.
     Establishes connection for live message broadcasting and user status updates.

@@ -1,6 +1,7 @@
 import logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
+from typing import Any, AsyncGenerator
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,7 +17,7 @@ loggerChat = logging.getLogger("src.chat")
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(_: FastAPI) -> AsyncGenerator[None, Any]:
     logger.info("Initializing rate limiter")
     await FastAPILimiter.init(get_redis_connection())
     yield
@@ -28,7 +29,7 @@ app = FastAPI(lifespan=lifespan)
 
 
 @app.exception_handler(AuthenticationError)
-async def authentication_error_handler(request: Request, exc: AuthenticationError):
+async def authentication_error_handler(request: Request, exc: AuthenticationError) -> JSONResponse:
     loggerChat.warning("Authentication failed: user not found or bad credentials")
     return JSONResponse(
         status_code=exc.status_code,
@@ -42,7 +43,7 @@ async def authentication_error_handler(request: Request, exc: AuthenticationErro
 
 
 @app.exception_handler(DuplicateUserError)
-async def duplicate_user_error_handler(request: Request, exc: DuplicateUserError):
+async def duplicate_user_error_handler(request: Request, exc: DuplicateUserError) -> JSONResponse:
     loggerChat.warning("Registration failed: username duplicate")
     return JSONResponse(
         status_code=exc.status_code,
@@ -56,7 +57,7 @@ async def duplicate_user_error_handler(request: Request, exc: DuplicateUserError
 
 
 @app.exception_handler(ChangingPasswordError)
-async def changing_password_error_handler(request: Request, exc: ChangingPasswordError):
+async def changing_password_error_handler(request: Request, exc: ChangingPasswordError) -> JSONResponse:
     logger.warning("Password change failed: validation or user mismatch")
     return JSONResponse(
         status_code=exc.status_code,
