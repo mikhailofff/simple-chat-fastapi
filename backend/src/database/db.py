@@ -38,7 +38,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, Any]:
             await session.close()
 
 
-async def get_paginated_messages(session: AsyncSession, first_id: int, limit: int) -> Sequence[Message]:
+async def get_paginated_messages(session: AsyncSession, first_id: int | None, limit: int) -> Sequence[Message]:
     stmt = select(Message).order_by(Message.id.desc()).limit(limit)
 
     if first_id:
