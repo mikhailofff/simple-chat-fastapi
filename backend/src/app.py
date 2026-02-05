@@ -36,7 +36,7 @@ async def authentication_error_handler(request: Request, exc: AuthenticationErro
         headers=exc.headers,
         content={
             "detail": exc.detail,
-            "error_code": exc.headers["X-Error-Code"],
+            "error_code": exc.headers["X-Error-Code"] if exc.headers else None,
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         },
     )
@@ -50,7 +50,7 @@ async def duplicate_user_error_handler(request: Request, exc: DuplicateUserError
         headers=exc.headers,
         content={
             "detail": exc.detail,
-            "error_code": exc.headers["X-Error-Code"],
+            "error_code": exc.headers["X-Error-Code"] if exc.headers else None,
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         },
     )
@@ -64,7 +64,7 @@ async def changing_password_error_handler(request: Request, exc: ChangingPasswor
         headers=exc.headers,
         content={
             "detail": exc.detail,
-            "error_code": exc.headers["X-Error-Code"],
+            "error_code": exc.headers["X-Error-Code"] if exc.headers else None,
             "timestamp": datetime.now(tz=timezone.utc).isoformat(),
         },
     )
