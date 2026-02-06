@@ -74,14 +74,14 @@ router = APIRouter()
 
 @router.post("/sign-up", dependencies=[Depends(limiter)])
 async def sign_up(
-    user: Annotated[UserRequest, Body],
+    user_request: Annotated[UserRequest, Body],
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserResponse:
     """
     Register a new user account.
     """
 
-    user = await create_user(session, user.username, user.password)
+    user = await create_user(session, user_request.username, user_request.password)
     user_response = UserResponse(id=user.id, username=user.username, hashed_password=user.hashed_password)
 
     logger.info("User registered")
@@ -109,7 +109,7 @@ async def login_for_access_and_refresh_token(
 
 
 @router.post("/refresh", dependencies=[Depends(limiter)])
-async def refresh_access_token(refresh_token: Annotated[str, Cookie()] = None) -> RefreshTokenResponse:
+async def refresh_access_token(refresh_token: Annotated[str | None, Cookie()] = None) -> RefreshTokenResponse:
     """
     Refresh access token and return it
     """

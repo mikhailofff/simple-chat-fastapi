@@ -13,10 +13,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
 REFRESH_TOKEN_EXPIRE_DAYS = settings.REFRESH_TOKEN_EXPIRE_DAYS
 
 
-def create_jwt_token(data: dict[str, str], expires_delta: timedelta) -> str:
+def create_jwt_token(data: dict[str, Any], expires_delta: timedelta) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + expires_delta
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": int(expire.timestamp())})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
@@ -28,7 +28,10 @@ def create_refresh_token(data: dict[str, str]) -> str:
     return create_jwt_token(data, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
 
 
-def verify_token(token: str) -> Any:
+def verify_token(token: str | None = None) -> Any:
+    if not token:
+        raise AuthenticationError()
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except ExpiredSignatureError:

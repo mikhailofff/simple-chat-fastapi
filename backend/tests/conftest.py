@@ -38,14 +38,14 @@ TestingAsyncSessionLocal = async_sessionmaker(
 
 
 @pytest_asyncio.fixture(scope="session")
-async def redis_connection() -> AsyncGenerator[FakeRedis, Any]:
+async def redis_connection() -> Any:
     redis_connection = fakeredis.FakeAsyncRedis()
     yield redis_connection
     await redis_connection.aclose()
 
 
 @pytest_asyncio.fixture(scope="session", autouse=True)
-async def cleanup_db() -> None:
+async def cleanup_db() -> AsyncGenerator[None, None]:
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -92,8 +92,8 @@ async def async_client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
             yield client
 
 
-def create_expired_token(data: dict[str, str], secret_key: str) -> str:
+def create_expired_token(data: dict[str, Any], secret_key: str) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) - timedelta(days=1)
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": int(expire.timestamp())})
     return jwt.encode(to_encode, secret_key, algorithm=settings.ALGORITHM)
